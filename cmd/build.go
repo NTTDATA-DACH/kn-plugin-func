@@ -108,6 +108,16 @@ EXAMPLES
 	cmd.Flags().StringP("image", "i", f.Image,
 		"Full image name in the form [registry]/[namespace]/[name]:[tag] (optional). This option takes precedence over --registry ($FUNC_IMAGE)")
 	cmd.Flags().BoolP("build-timestamp", "", false, "Use the actual time as the created time for the docker image. This is only useful for buildpacks builder.")
+	cmd.Flags().StringP("git-url", "g", f.Build.Git.URL,
+		"Repository url containing the function to build ($FUNC_GIT_URL)")
+	cmd.Flags().StringP("git-branch", "t", f.Build.Git.Revision,
+		"Git revision (branch) to be used when deploying via the Git repository ($FUNC_GIT_BRANCH)")
+	cmd.Flags().StringP("git-dir", "d", f.Build.Git.ContextDir,
+		"Directory in the Git repository containing the function (default is the root) ($FUNC_GIT_DIR)")
+	cmd.Flags().BoolP("remote", "R", f.Deploy.Remote,
+		"Trigger a remote deployment. Default is to deploy and build from the local system ($FUNC_REMOTE)")
+	cmd.Flags().String("pvc-size", f.Build.PVCSize,
+		"When triggering a remote deployment, set a custom volume size to allocate for the build operation ($FUNC_PVC_SIZE)")
 
 	// Static Flags:
 	// Options which have static defaults only (not globally configurable nor
@@ -218,6 +228,15 @@ type buildConfig struct {
 	// working directory of the process.
 	Path string
 
+	// Git branch for remote builds
+	GitBranch string
+
+	// Directory in the git repo where the function is located
+	GitDir string
+
+	// Git repo url for remote builds
+	GitURL string
+
 	// Platform ofr resultant image (s2i builder only)
 	Platform string
 
@@ -227,6 +246,13 @@ type buildConfig struct {
 	// Build with the current timestamp as the created time for docker image.
 	// This is only useful for buildpacks builder.
 	WithTimestamp bool
+
+	// Remote indicates the deployment (and possibly build) process are to
+	// be triggered in a remote environment rather than run locally.
+	Remote bool
+
+	// PVCSize configures the PVC size used by the pipeline if --remote flag is set.
+	PVCSize string
 }
 
 // newBuildConfig gathers options into a single build request.
@@ -241,10 +267,14 @@ func newBuildConfig() buildConfig {
 		BuilderImage:  viper.GetString("builder-image"),
 		Image:         viper.GetString("image"),
 		Path:          viper.GetString("path"),
+		GitBranch:     viper.GetString("git-branch"),
+		GitDir:        viper.GetString("git-dir"),
+		GitURL:        viper.GetString("git-url"),
 		Platform:      viper.GetString("platform"),
 		Push:          viper.GetBool("push"),
 		WithTimestamp: viper.GetBool("build-timestamp"),
-	}
+		Remote:        viper.GetBool("remote"),
+		PVCSize:       viper.GetString("pvc-size")}
 }
 
 // Configure the given function.  Updates a function struct with all

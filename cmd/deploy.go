@@ -427,15 +427,6 @@ type deployConfig struct {
 	// the FWDN.  Example `func delete www.example.com`
 	Domain string
 
-	// Git branch for remote builds
-	GitBranch string
-
-	// Directory in the git repo where the function is located
-	GitDir string
-
-	// Git repo url for remote builds
-	GitURL string
-
 	// Namespace override for the deployed function.  If provided, the
 	// underlying platform will be instructed to deploy the function to the given
 	// namespace (if such a setting is applicable; such as for Kubernetes
@@ -447,14 +438,7 @@ type deployConfig struct {
 	//Service account to be used in deployed function
 	ServiceAccountName string
 
-	// Remote indicates the deployment (and possibly build) process are to
-	// be triggered in a remote environment rather than run locally.
-	Remote bool
-
-	// PVCSize configures the PVC size used by the pipeline if --remote flag is set.
-	PVCSize string
-
-	// Timestamp the built contaienr with the current date and time.
+	// Timestamp the built container with the current date and time.
 	// This is currently only supported by the Pack builder.
 	Timestamp bool
 }
@@ -467,12 +451,7 @@ func newDeployConfig(cmd *cobra.Command) (c deployConfig) {
 		Build:              viper.GetString("build"),
 		Env:                viper.GetStringSlice("env"),
 		Domain:             viper.GetString("domain"),
-		GitBranch:          viper.GetString("git-branch"),
-		GitDir:             viper.GetString("git-dir"),
-		GitURL:             viper.GetString("git-url"),
 		Namespace:          viper.GetString("namespace"),
-		Remote:             viper.GetBool("remote"),
-		PVCSize:            viper.GetString("pvc-size"),
 		Timestamp:          viper.GetBool("build-timestamp"),
 		ServiceAccountName: viper.GetString("service-account"),
 	}
